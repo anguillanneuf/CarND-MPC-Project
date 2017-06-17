@@ -37,14 +37,21 @@ size_t delta_start = epsi_start + N;
 size_t a_start = delta_start + N - 1;
 
 // Adjust weight for each term of the cost function to get desired results.
-double cte_cost_weight = 200;
-double epsi_cost_weight = 50;
-double speed_cost_weight = 1;
-double throttle_cost_weight = 15;
-double steering_cost_weight = 350;
-double delta_throttle_cost_weight = 30;
-double delta_steering_cost_weight = 7000;
+//double cte_cost_weight = 200;
+//double epsi_cost_weight = 50;
+//double speed_cost_weight = 1;
+//double throttle_cost_weight = 15;
+//double steering_cost_weight = 350;
+//double delta_throttle_cost_weight = 30;
+//double delta_steering_cost_weight = 7000;
 
+double cte_cost_weight;
+double epsi_cost_weight;
+double speed_cost_weight;
+double throttle_cost_weight;
+double steering_cost_weight;
+double delta_throttle_cost_weight;
+double delta_steering_cost_weight;
 
 class FG_eval {
 public:
@@ -166,7 +173,16 @@ double MPC::getLf(){
     return Lf;
 };
 
-void MPC::Init(){
+void MPC::Init(double w0, double w1, double w2, double w3, double w4, double w5, double w6){
+
+    cte_cost_weight = w0;
+    epsi_cost_weight = w1;
+    speed_cost_weight = w2;
+    throttle_cost_weight = w3;
+    steering_cost_weight = w4;
+    delta_throttle_cost_weight = w5;
+    delta_steering_cost_weight = w6;
+
     for(int i = 0; i < N - 1; i++){
         x_predicted.push_back(0.0);
         y_predicted.push_back(0.0);
@@ -224,7 +240,7 @@ vector<double> MPC::Solve(Eigen::VectorXd state, Eigen::VectorXd coeffs) {
     // degrees (values in radians).
     // NOTE: Feel free to change this to something else.
     for (int i = delta_start; i < a_start; i++) {
-        vars_lowerbound[i] = -25.0 * M_PI /180.0;
+        vars_lowerbound[i] = -25.0 * M_PI /180.0; // vars in radians
         vars_upperbound[i] = 25.0 * M_PI /180.0;
     }
 

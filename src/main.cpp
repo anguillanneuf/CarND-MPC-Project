@@ -68,13 +68,29 @@ Eigen::VectorXd polyfit(Eigen::VectorXd xvals, Eigen::VectorXd yvals,
 }
 
 
-
-int main() {
+int main(int argc, const char *argv[]) {
     uWS::Hub h;
+
+    // speed up testing by entering weights for each term in the cost function
+    double w0, w1, w2, w3, w4, w5, w6;
+
+    if (argc == 8 ) {
+        w0 = strtod( argv[1], NULL ) ;
+        w1 = strtod( argv[2], NULL ) ;
+        w2 = strtod( argv[3], NULL ) ;
+        w3 = strtod( argv[4], NULL ) ;
+        w4 = strtod( argv[5], NULL ) ;
+        w5 = strtod( argv[6], NULL ) ;
+        w6 = strtod( argv[7], NULL ) ;
+    } else {
+        cout << "Usage ./mpc w0 w1 w2 w3 w4 w5 w6" << endl;
+        return -1 ;
+    }
 
     // MPC is initialized here!
     MPC mpc;
-    mpc.Init();
+    mpc.Init(w0, w1, w2, w3, w4, w5, w6);
+
 
     h.onMessage([&mpc](uWS::WebSocket<uWS::SERVER> ws, char *data, size_t length,
                        uWS::OpCode opCode) {
@@ -96,7 +112,7 @@ int main() {
                     double py = j[1]["y"];
                     double psi = j[1]["psi"];
                     double v = j[1]["speed"];
-                    double steer = j[1]["steering_angle"];
+                    double steer = j[1]["steering_angle"]; // in radians
                     double throttle = j[1]["throttle"];
 
                     /*
