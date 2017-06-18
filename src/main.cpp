@@ -72,13 +72,14 @@ int main(int argc, const char *argv[]) {
     uWS::Hub h;
 
     // speed up testing by entering weights for each term in the cost function
-    /* worked well
+    /*
      * ./mpc 1 1 1 1 500 1 1 10 0.05 50
      * ./mpc 1 1 1 1 500 1 1 10 0.05 55
      * ./mpc 1 1 1 1 100 1 3000 15 0.05 65
      * ./mpc 1 1 1 1 100 1 3000 15 0.05 75
      * ./mpc 1 1 1 0.1 500 5 3000 20 0.05 75
      * ./mpc 1 1e-2 1e-3.5 1e-6 300 1e-2 7000 10 0.05 100
+     * ./mpc 1 1 1 1e-6 300 1 7000 12 0.05 85
      * */
 
     double w0, w1, w2, w3, w4, w5, w6, dt_input, v_input;

@@ -75,6 +75,21 @@ public:
         for (int t = epsi_start; t < N + epsi_start; t++) {
             fg[0] += epsi_cost_weight * CppAD::pow(vars[t], 2);
         }
+
+        /* adjust ref_v according to curve and steering angle
+         * http://www.intmath.com/applications-differentiation/8-radius-curvature.php
+         * */
+
+        AD<double> dfdx = coeffs[1] + 2 * coeffs[2] * vars[x_start] + 3 * coeffs[3] * pow(vars[x_start], 2);
+        AD<double> dfdx2 = 2 * coeffs[2] + 2 * 3 * coeffs[3] * vars[x_start];
+        AD<double> R_curve = pow(1 + dfdx * dfdx, 1.5) / abs(dfdx2);
+
+        if (vars[delta_start] > 4.0 * M_PI /180.0 || vars[delta_start] < -4.0 * M_PI /180.0 || R_curve < 50.0){
+            ref_v = 55.0;
+        } else {
+            ref_v = 105.0;
+        }
+
         // Consideration 3: dealing with stopping
         for (int t = v_start; t < N + v_start; t++) {
             fg[0] += speed_cost_weight * CppAD::pow(vars[t] - ref_v, 2);
