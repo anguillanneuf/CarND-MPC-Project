@@ -2,6 +2,11 @@
 
 This project implements Model Predictive Control (MPC) to drive the car around the track. Unlike in the previous [PID Control project](https://github.com/anguillanneuf/CarND-PID-Control-Project), no cross track error is given this time. Additionally, there's a 100 millisecond latency between actuations commands on top of the connection latency. A Model Predictive Controller is able to drive the car much more smoothly than a PID controller, as can be seen in my project videos for [Smooth Driving at 50 mph](https://youtu.be/6iqupZT016w) and [Smooth Driving at max. 100+ mph](https://youtu.be/9hv8Y8NaNYo). 
 
+[//]: # (Image References)
+[image1]: ./img/Screen%20Shot%202017-06-18%20at%203.03.11%20PM.png
+[image2]: ./img/Screen%20Shot%202017-06-18%20at%203.03.45%20PM.png
+[image3]: ./img/Screen%20Shot%202017-06-18%20at%203.03.52%20PM.png
+
 ### The Model
 
 > Student describes their model in detail. This includes the state, actuators and update equations.
@@ -34,6 +39,13 @@ if (vars[delta_start] > 4.0 * M_PI /180.0 || vars[delta_start] < -4.0 * M_PI /18
     v = fmin(105.0, ref_v);
 }
 ```
+MPC applies the brake to slow down the car, turning -7.79˚ travelling at 86.33 mph, around this corner.  
+
+![alt text][image1]
+
+MPC continues to accelerate the car, already travelling at 99+ mph, because both its steering angle and the road curvature are within the safe bounds.  
+
+![alt text][image3]
 
 ### Timestep Length and Elapsed Duration (N & dt)
 
