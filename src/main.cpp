@@ -77,6 +77,8 @@ int main(int argc, const char *argv[]) {
      * ./mpc 1 1 1 1 500 1 1 10 0.05 55
      * ./mpc 1 1 1 1 100 1 3000 15 0.05 65
      * ./mpc 1 1 1 1 100 1 3000 15 0.05 75
+     * ./mpc 1 1 1 0.1 500 5 3000 20 0.05 75
+     * ./mpc 1 1e-2 1e-3.5 1e-6 300 1e-2 7000 10 0.05 100
      * */
 
     double w0, w1, w2, w3, w4, w5, w6, dt_input, v_input;
@@ -144,7 +146,7 @@ int main(int argc, const char *argv[]) {
 
                     // fit a 3rd degree polynomial to the above x and y waypoints
                     auto coeffs = polyfit(x, y, 3);
-                    
+
                     // apply latency to state vector
                     double latency = 0.1;
 
