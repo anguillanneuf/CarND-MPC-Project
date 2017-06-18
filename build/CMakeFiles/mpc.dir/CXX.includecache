@@ -1125,6 +1125,8 @@ cppad/ipopt/solve.hpp
 -
 Eigen-3.3/Eigen/Core
 /Users/tz/Documents/carnd/CarND-MPC-Project-master/src/Eigen-3.3/Eigen/Core
+math.h
+-
 
 /Users/tz/Documents/carnd/CarND-MPC-Project-master/src/MPC.h
 vector

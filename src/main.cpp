@@ -74,12 +74,12 @@ int main(int argc, const char *argv[]) {
     // speed up testing by entering weights for each term in the cost function
     /*
      * ./mpc 1 1 1 1 500 1 1 10 0.05 50
-     * ./mpc 1 1 1 1 500 1 1 10 0.05 55
+     * ./mpc 1 1 1 1 500 1 1 20 0.05 55
+     * ./mpc 1 1 1 1 100 1 3000 15 0.05 60
      * ./mpc 1 1 1 1 100 1 3000 15 0.05 65
-     * ./mpc 1 1 1 1 100 1 3000 15 0.05 75
      * ./mpc 1 1 1 0.1 500 5 3000 20 0.05 75
-     * ./mpc 1 1e-2 1e-3.5 1e-6 300 1e-2 7000 10 0.05 100
-     * ./mpc 1 1 1 1e-6 300 1 7000 12 0.05 85
+     * ./mpc 1 1e-2 1e-3.5 1e-6 300 1e-2 7000 10 0.05 95
+     * ./mpc 1 1 1 1e-6 300 1 7000 12 0.05 100
      * */
 
     double w0, w1, w2, w3, w4, w5, w6, dt_input, v_input;
@@ -97,7 +97,8 @@ int main(int argc, const char *argv[]) {
         dt_input = strtod( argv[9], NULL ) ;
         v_input = strtod( argv[10], NULL ) ;
     } else {
-        cout << "Usage ./mpc w0 w1 w2 w3 w4 w5 w6 N dt ref_v" << endl;
+        cout << "Usage ./mpc cte_cost epsi_cost speed_cost throttle_cost steer_cost dt_throttle_cost dt_steer_cost N dt v"
+             << endl;
         return -1 ;
     }
 
@@ -136,7 +137,7 @@ int main(int argc, const char *argv[]) {
                     *
                     */
 
-                    // Map global x and y positions of waypoints to car coordinate system.
+                    // map global x and y positions of waypoints to car coordinate system.
                     Eigen::VectorXd x(ptsx.size());
                     Eigen::VectorXd y(ptsy.size());
 
@@ -153,7 +154,7 @@ int main(int argc, const char *argv[]) {
 
                     Eigen::VectorXd state(6);
 
-                    // initialize to 0.0 because we are in car coordinate system.
+                    // initialize to 0.0 because car is at (0,0) in its own coordinate system.
                     px = py = psi = 0.0;
 
                     // update px, py, psi, v according to latency

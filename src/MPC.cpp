@@ -2,6 +2,7 @@
 #include <cppad/cppad.hpp>
 #include <cppad/ipopt/solve.hpp>
 #include "Eigen-3.3/Eigen/Core"
+#include <math.h>
 
 using CppAD::AD;
 
@@ -83,16 +84,17 @@ public:
         AD<double> dfdx = coeffs[1] + 2 * coeffs[2] * vars[x_start] + 3 * coeffs[3] * pow(vars[x_start], 2);
         AD<double> dfdx2 = 2 * coeffs[2] + 2 * 3 * coeffs[3] * vars[x_start];
         AD<double> R_curve = pow(1 + dfdx * dfdx, 1.5) / abs(dfdx2);
+        double v;
 
         if (vars[delta_start] > 4.0 * M_PI /180.0 || vars[delta_start] < -4.0 * M_PI /180.0 || R_curve < 50.0){
-            ref_v = 55.0;
+            v = fmin(55.0, ref_v/2.0);
         } else {
-            ref_v = 105.0;
+            v = fmin(105.0, ref_v);
         }
 
         // Consideration 3: dealing with stopping
         for (int t = v_start; t < N + v_start; t++) {
-            fg[0] += speed_cost_weight * CppAD::pow(vars[t] - ref_v, 2);
+            fg[0] += speed_cost_weight * CppAD::pow(vars[t] - v, 2);
         }
         // Considerations 4: add steering control input to avoid jerking the steering wheel
         for (int t = delta_start; t < N - 1 + delta_start; t++) {
