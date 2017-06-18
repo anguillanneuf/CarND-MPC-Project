@@ -72,9 +72,17 @@ int main(int argc, const char *argv[]) {
     uWS::Hub h;
 
     // speed up testing by entering weights for each term in the cost function
-    double w0, w1, w2, w3, w4, w5, w6;
+    /* worked well
+     * ./mpc 1 1 1 1 500 1 1 10 0.05 50
+     * ./mpc 1 1 1 1 500 1 1 10 0.05 55
+     * ./mpc 1 1 1 1 100 1 3000 15 0.05 65
+     * ./mpc 1 1 1 1 100 1 3000 15 0.05 75
+     * */
 
-    if (argc == 8 ) {
+    double w0, w1, w2, w3, w4, w5, w6, dt_input, v_input;
+    int N_input;
+
+    if (argc == 11 ) {
         w0 = strtod( argv[1], NULL ) ;
         w1 = strtod( argv[2], NULL ) ;
         w2 = strtod( argv[3], NULL ) ;
@@ -82,14 +90,17 @@ int main(int argc, const char *argv[]) {
         w4 = strtod( argv[5], NULL ) ;
         w5 = strtod( argv[6], NULL ) ;
         w6 = strtod( argv[7], NULL ) ;
+        N_input = strtod( argv[8], NULL ) ;
+        dt_input = strtod( argv[9], NULL ) ;
+        v_input = strtod( argv[10], NULL ) ;
     } else {
-        cout << "Usage ./mpc w0 w1 w2 w3 w4 w5 w6" << endl;
+        cout << "Usage ./mpc w0 w1 w2 w3 w4 w5 w6 N dt ref_v" << endl;
         return -1 ;
     }
 
     // MPC is initialized here!
     MPC mpc;
-    mpc.Init(w0, w1, w2, w3, w4, w5, w6);
+    mpc.Init(w0, w1, w2, w3, w4, w5, w6, N_input, dt_input, v_input);
 
 
     h.onMessage([&mpc](uWS::WebSocket<uWS::SERVER> ws, char *data, size_t length,
@@ -133,25 +144,26 @@ int main(int argc, const char *argv[]) {
 
                     // fit a 3rd degree polynomial to the above x and y waypoints
                     auto coeffs = polyfit(x, y, 3);
+                    
+                    // apply latency to state vector
+                    double latency = 0.1;
+
+                    Eigen::VectorXd state(6);
+
+                    // initialize to 0.0 because we are in car coordinate system.
+                    px = py = psi = 0.0;
+
+                    // update px, py, psi, v according to latency
+                    px += v * cos(psi) * latency;
+                    py += v * sin(psi) * latency;
+                    psi -= v * steer / mpc.getLf() * latency;
+                    v += throttle * latency;
 
                     // calculate cross track error;
                     double cte = polyeval(coeffs, px) - py;
 
                     // calculate orientation error;
                     double epsi = psi - atan(coeffs[1] + 2 * coeffs[2] * px + 3 * coeffs[3] * pow(px, 2));
-
-                    // apply latency to state vector
-                    double latency = 0.1;
-
-                    Eigen::VectorXd state(6);
-
-                    //px += v * cos(psi) * latency;
-                    px = v * latency;
-                    //py += v * sin(psi) * latency;
-                    py = 0.0;
-                    //psi -= v * steer / mpc.getLf() * latency;
-                    psi = -v * steer / mpc.getLf() * latency;
-                    //v += throttle * latency;
 
                     state << px, py, psi, v, cte, epsi;
 
@@ -161,6 +173,8 @@ int main(int argc, const char *argv[]) {
 
                     auto vars = mpc.Solve(state, coeffs);
 
+                    // NOTE: Remember to divide by deg2rad(25) before you send the steering value back.
+                    // Otherwise the values will be in between [-deg2rad(25), deg2rad(25] instead of [-1, 1].
                     steer_value = -vars[0]/deg2rad(25);
                     throttle_value = vars[1];
 
@@ -168,8 +182,7 @@ int main(int argc, const char *argv[]) {
                     throttle_value = fmin(fmax(-1.0, throttle_value), 1.0);
 
                     json msgJson;
-                    // NOTE: Remember to divide by deg2rad(25) before you send the steering value back.
-                    // Otherwise the values will be in between [-deg2rad(25), deg2rad(25] instead of [-1, 1].
+
                     msgJson["steering_angle"] = steer_value;
                     msgJson["throttle"] = throttle_value;
 

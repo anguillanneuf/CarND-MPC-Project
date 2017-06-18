@@ -6,8 +6,8 @@
 using CppAD::AD;
 
 // TODO: Set the time step length and duration
-size_t N = 10;
-double dt = 0.05;
+size_t N;
+double dt;
 
 // This value assumes the model presented in the classroom is used.
 //
@@ -21,30 +21,22 @@ double dt = 0.05;
 // This is the length from front to CoG that has a similar radius.
 const double Lf = 2.67;
 
-double ref_v = 50.0;
+double ref_v;
 
 // (same as in mpc_to_line quiz)
 // The solver takes all the state variables and actuator
 // variables in a singular vector. Thus, we should to establish
 // when one variable starts and another ends to make our lives easier.
-size_t x_start = 0;
-size_t y_start = x_start + N;
-size_t psi_start = y_start + N;
-size_t v_start = psi_start + N;
-size_t cte_start = v_start + N;
-size_t epsi_start = cte_start + N;
-size_t delta_start = epsi_start + N;
-size_t a_start = delta_start + N - 1;
+size_t x_start;
+size_t y_start;
+size_t psi_start;
+size_t v_start;
+size_t cte_start;
+size_t epsi_start;
+size_t delta_start;
+size_t a_start;
 
 // Adjust weight for each term of the cost function to get desired results.
-//double cte_cost_weight = 200;
-//double epsi_cost_weight = 50;
-//double speed_cost_weight = 1;
-//double throttle_cost_weight = 15;
-//double steering_cost_weight = 350;
-//double delta_throttle_cost_weight = 30;
-//double delta_steering_cost_weight = 7000;
-
 double cte_cost_weight;
 double epsi_cost_weight;
 double speed_cost_weight;
@@ -173,8 +165,10 @@ double MPC::getLf(){
     return Lf;
 };
 
-void MPC::Init(double w0, double w1, double w2, double w3, double w4, double w5, double w6){
+void MPC::Init(double w0, double w1, double w2, double w3, double w4, double w5, double w6,
+               int N_input, double dt_input, double v_input){
 
+    // read from CL
     cte_cost_weight = w0;
     epsi_cost_weight = w1;
     speed_cost_weight = w2;
@@ -182,6 +176,19 @@ void MPC::Init(double w0, double w1, double w2, double w3, double w4, double w5,
     steering_cost_weight = w4;
     delta_throttle_cost_weight = w5;
     delta_steering_cost_weight = w6;
+    N = N_input;
+    dt = dt_input;
+    ref_v = v_input;
+
+    // update indices
+    x_start = 0;
+    y_start = x_start + N;
+    psi_start = y_start + N;
+    v_start = psi_start + N;
+    cte_start = v_start + N;
+    epsi_start = cte_start + N;
+    delta_start = epsi_start + N;
+    a_start = delta_start + N - 1;
 
     for(int i = 0; i < N - 1; i++){
         x_predicted.push_back(0.0);
